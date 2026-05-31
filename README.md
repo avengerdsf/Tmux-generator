@@ -14,6 +14,7 @@ Web tool for creating, previewing, exporting, launching, and stopping tmux sessi
 - Optionally install quick start, stop, and delete commands.
 - Cache UI configuration in `.codex/tmux-generator-ui.json`.
 - Launch tmux in a local terminal and stop the generated tmux session from the web UI.
+- Access the web UI from another device on the same LAN by using the server machine IP and port.
 - Discover the service by UDP broadcast.
 
 ## Requirements
@@ -23,6 +24,14 @@ Web tool for creating, previewing, exporting, launching, and stopping tmux sessi
 - One supported local terminal command when launching from a background service: `x-terminal-emulator`, `gnome-terminal`, `konsole`, `xfce4-terminal`, or `xterm`
 
 ## Install
+
+Install from wheel:
+
+```bash
+pip install tmux_generator-1.0.0-py3-none-any.whl
+```
+
+Install from source:
 
 ```bash
 pip install -e .
@@ -44,6 +53,12 @@ Open:
 
 ```text
 http://127.0.0.1:6060
+```
+
+LAN access from another device:
+
+```text
+http://<server-lan-ip>:6060
 ```
 
 ## Server Config
