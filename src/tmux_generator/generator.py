@@ -87,7 +87,6 @@ def _pane_order_label(order: int) -> str:
 def _yaml_node(node: dict, window: dict, indent: int = 0) -> list[str]:
     sp = " " * indent
     if node.get("type") == "pane":
-        tags = "[" + ", ".join(json.dumps(tag, ensure_ascii=False) for tag in node.get("tags", [])) + "]"
         order = _pane_order_map(window).get(node.get("id", ""), 0)
         return [
             f"{sp}- type: pane",
@@ -95,7 +94,6 @@ def _yaml_node(node: dict, window: dict, indent: int = 0) -> list[str]:
             f"{sp}  id: {node.get('id', '')}",
             f"{sp}  title: {json.dumps(node.get('title', ''), ensure_ascii=False)}",
             f"{sp}  command: {json.dumps(node.get('command', ''), ensure_ascii=False)}",
-            f"{sp}  tags: {tags}",
         ]
     lines = [
         f"{sp}- type: split",
