@@ -1,6 +1,10 @@
 # tmux-generator
 
+[中文](README.zh-CN.md) | English
+
 Web tool for creating, previewing, exporting, launching, and stopping tmux session scripts.
+
+![tmux-generator main page](image/image.png)
 
 ## Features
 

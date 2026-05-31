@@ -1,6 +1,10 @@
 # tmux-generator
 
+中文 | [English](README.md)
+
 用于创建、预览、导出、启动和关闭 tmux session 脚本的 Web 工具。
+
+![tmux-generator 主页面](image/image.png)
 
 ## 功能
 
