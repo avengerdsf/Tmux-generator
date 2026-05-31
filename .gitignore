@@ -1,0 +1,27 @@
+# Ignore everything by default; allow source code, tests, package metadata, README files, and required change record.
+*
+
+!.gitignore
+!pyproject.toml
+!README.md
+!README.zh-CN.md
+
+!src/
+!src/**
+
+# Keep generated/local files out even under allowed directories.
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.codex/
+.agents/
+.venv/
+venv/
+*.log
+tests/
+tests/**
+
+doc/
+doc/record.md
