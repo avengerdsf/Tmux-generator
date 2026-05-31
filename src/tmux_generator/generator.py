@@ -32,6 +32,10 @@ def shell_quote(value: object) -> str:
     return "'" + str(value).replace("'", "'\"'\"'") + "'"
 
 
+def tmux_target(value: str) -> str:
+    return value if value.startswith("$") else shell_quote(value)
+
+
 def sanitize_command_name(value: str, fallback: str) -> str:
     cleaned = re.sub(r"[^A-Za-z0-9_-]", "_", str(value or "").strip()).lstrip("_")
     return cleaned or fallback
@@ -132,11 +136,13 @@ def generate_yaml(config: dict, quick: QuickCommandOptions | None = None) -> str
 def _tmux_node(node: dict, target: str, commands: list[str], window: dict) -> None:
     if node.get("type") == "pane":
         order = _pane_order_map(window).get(node.get("id", ""), 0)
-        title = f"[{_pane_order_label(order)}] {node.get('title') or node.get('id', '')}"
+        raw_title = node.get("title") or node.get("id", "")
+        title = f"[{_pane_order_label(order)}] {raw_title}"
         commands.append(f"# pane {_pane_order_label(order)} / {node.get('id', '')} / {node.get('title', '')}")
-        commands.append(f"tmux select-pane -t {shell_quote(target)} -T {shell_quote(title)}")
+        commands.append(f"tmux set-option -p -t {tmux_target(target)} @my_title {shell_quote(raw_title)}")
+        commands.append(f"tmux select-pane -t {tmux_target(target)} -T {shell_quote(title)}")
         if node.get("command"):
-            commands.append(f"tmux send-keys -t {shell_quote(target)} {shell_quote(node['command'])} C-m")
+            commands.append(f"tmux send-keys -t {tmux_target(target)} {shell_quote(node['command'])} C-m")
         return
     children = node.get("children") or []
     if not children:
@@ -144,8 +150,9 @@ def _tmux_node(node: dict, target: str, commands: list[str], window: dict) -> No
     _tmux_node(children[0], target, commands, window)
     for index, child in enumerate(children[1:]):
         flag = "-h" if node.get("direction") == "row" else "-v"
-        commands.append(f"tmux split-window {flag} -t {shell_quote(target)}")
-        child_target = target.rsplit(".", 1)[0] + ".+" + str(index + 1)
+        first_pane = ordered_panes({"layout": child})[0]
+        child_target = "$pane_" + _pane_order_label(_pane_order_map(window).get(first_pane["id"], index + 2))
+        commands.append(f"{child_target[1:]}=$(tmux split-window {flag} -t {tmux_target(target)} -P -F '#{{pane_id}}')")
         _tmux_node(child, child_target, commands, window)
 
 
@@ -156,6 +163,10 @@ def tmux_commands(config: dict, include_comments: bool = True) -> list[str]:
     if include_comments:
         commands.extend(["# 启动命令", "# pane order: top-to-bottom first, then left-to-right"])
     commands.append(f"tmux new-session -d -s {shell_quote(session)} -n {shell_quote(windows[0].get('name', 'main'))}")
+    commands.append(f"tmux set-window-option -t {shell_quote(session)} pane-border-status top")
+    commands.append(f"tmux set-window-option -t {shell_quote(session)} pane-border-format {shell_quote(' [ #{@my_title} ] ')}")
+    commands.append(f"tmux set-option -t {shell_quote(session)} mouse on")
+    commands.append(f"tmux set-option -t {shell_quote(session)} allow-rename off")
     for index, window in enumerate(windows):
         if index > 0:
             commands.append(f"tmux new-window -t {shell_quote(session)} -n {shell_quote(window.get('name', 'window'))}")
