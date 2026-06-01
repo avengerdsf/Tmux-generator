@@ -12,7 +12,6 @@
 - 预览生成的 YAML 和 shell 脚本。
 - 将 YAML、shell 脚本或两者导出到服务端目录。
 - 可选安装启动、关闭、删除三个短命令。
-- 将界面配置缓存到 `.codex/tmux-generator-ui.json`。
 - 从 Web 页面启动 tmux 时打开本地终端，关闭时终止对应 tmux session。
 - 支持同一局域网内其他设备通过服务器 IP 和端口访问 Web 页面。
 - 支持 UDP 广播发现服务。
