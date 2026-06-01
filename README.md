@@ -12,7 +12,6 @@ Web tool for creating, previewing, exporting, launching, and stopping tmux sessi
 - Preview generated YAML and shell scripts.
 - Export YAML, shell scripts, or both to a server-side directory.
 - Optionally install quick start, stop, and delete commands.
-- Cache UI configuration in `.codex/tmux-generator-ui.json`.
 - Launch tmux in a local terminal and stop the generated tmux session from the web UI.
 - Access the web UI from another device on the same LAN by using the server machine IP and port.
 - Discover the service by UDP broadcast.
