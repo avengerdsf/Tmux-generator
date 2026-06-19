@@ -6,7 +6,7 @@ import uvicorn
 
 from .api import create_app
 from .config import DEFAULT_CONFIG_PATH, load_config
-from .discovery import DISCOVERY_PORT, start_discovery_thread
+from .discovery import DISCOVERY_PORT, DiscoveryThread
 
 
 def main() -> None:
@@ -22,9 +22,8 @@ def main() -> None:
         file_config = load_config(args.config)
         args.host = file_config.host
         args.port = file_config.port
-    if not args.no_discovery:
-        start_discovery_thread(args.port, args.discovery_port)
-    uvicorn.run(create_app(), host=args.host, port=args.port)
+    discovery = None if args.no_discovery else DiscoveryThread(args.port, args.discovery_port)
+    uvicorn.run(create_app(discovery), host=args.host, port=args.port)
 
 
 if __name__ == "__main__":

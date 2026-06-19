@@ -20,6 +20,11 @@ from .generator import (
     session_name,
     tmux_commands,
 )
+from .lifecycle import PageLifecycle
+
+
+class PageRequest(BaseModel):
+    page_id: str
 
 
 class QuickRequest(BaseModel):
@@ -103,9 +108,14 @@ def stop_tmux_session(config: dict) -> dict:
     return {"returncode": process.returncode, "stdout": process.stdout, "stderr": process.stderr, "session": session_name(config)}
 
 
-def create_app() -> FastAPI:
+def create_app(discovery=None) -> FastAPI:
     app = FastAPI(title="tmux-generator")
     static_dir = Path(__file__).with_name("static")
+    lifecycle = PageLifecycle(
+        on_active=discovery.start if discovery else None,
+        on_idle=discovery.stop if discovery else None,
+    )
+    app.state.page_lifecycle = lifecycle
 
     @app.get("/")
     def index():
@@ -114,6 +124,18 @@ def create_app() -> FastAPI:
     @app.get("/api/health")
     def health():
         return {"ok": True, "service": "tmux_generator"}
+
+    @app.get("/api/page/status")
+    def page_status():
+        return lifecycle.status()
+
+    @app.post("/api/page/heartbeat")
+    def page_heartbeat(request: PageRequest):
+        return lifecycle.heartbeat(request.page_id)
+
+    @app.post("/api/page/leave")
+    def page_leave(request: PageRequest):
+        return lifecycle.leave(request.page_id)
 
     @app.get("/api/fs/list")
     def fs_list(path: str = "/"):
