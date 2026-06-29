@@ -17,6 +17,7 @@ from .generator import (
     export_files,
     generate_script,
     generate_yaml,
+    import_script,
     session_name,
     tmux_commands,
 )
@@ -42,6 +43,11 @@ class PreviewRequest(BaseModel):
 class ExportRequest(PreviewRequest):
     kind: str = "yaml"
     bin_dir: str | None = None
+    previous_quick: QuickRequest | None = None
+
+
+class ImportShRequest(BaseModel):
+    script: str
 
 
 class TmuxRequest(BaseModel):
@@ -62,13 +68,38 @@ def preview_payload(config: dict, directory: str, quick: QuickCommandOptions | N
     }
 
 
-def export_payload(config: dict, kind: str, directory: str, quick: QuickCommandOptions, bin_dir: str | None = None) -> dict:
-    result = export_files(config, ExportOptions(kind=kind, directory=directory, quick=quick, bin_dir=bin_dir))
-    return {"files": [str(path) for path in result.files], "quick_commands": [str(path) for path in result.quick_commands]}
+def export_payload(
+    config: dict,
+    kind: str,
+    directory: str,
+    quick: QuickCommandOptions,
+    bin_dir: str | None = None,
+    previous_quick: QuickCommandOptions | None = None,
+) -> dict:
+    result = export_files(config, ExportOptions(kind=kind, directory=directory, quick=quick, bin_dir=bin_dir, previous_quick=previous_quick))
+    return {
+        "files": [str(path) for path in result.files],
+        "quick_commands": [str(path) for path in result.quick_commands],
+        "quick": {"enabled": result.quick.enabled, "start": result.quick.start, "stop": result.quick.stop},
+    }
+
+
+def import_sh_payload(script: str) -> dict:
+    try:
+        return import_script(script)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 def _quick(value: QuickRequest) -> QuickCommandOptions:
     return QuickCommandOptions(enabled=value.enabled, start=value.start, stop=value.stop)
+
+
+def _model_data(model: BaseModel) -> dict:
+    model_dump = getattr(model, "model_dump", None)
+    if model_dump:
+        return model_dump()
+    return model.dict()
 
 
 def list_directory(path: str) -> dict:
@@ -147,7 +178,7 @@ def create_app(discovery=None) -> FastAPI:
 
     @app.post("/api/config")
     def save_config(request: ConfigCacheRequest):
-        return save_ui_config(request.model_dump())
+        return save_ui_config(_model_data(request))
 
     @app.post("/api/preview")
     def preview(request: PreviewRequest):
@@ -155,7 +186,12 @@ def create_app(discovery=None) -> FastAPI:
 
     @app.post("/api/export")
     def export(request: ExportRequest):
-        return export_payload(request.config, request.kind, request.directory, _quick(request.quick), request.bin_dir)
+        previous_quick = _quick(request.previous_quick) if request.previous_quick else None
+        return export_payload(request.config, request.kind, request.directory, _quick(request.quick), request.bin_dir, previous_quick)
+
+    @app.post("/api/import/sh")
+    def import_sh(request: ImportShRequest):
+        return import_sh_payload(request.script)
 
     @app.post("/api/tmux/start")
     def start_tmux(request: TmuxRequest):

@@ -11,6 +11,7 @@
 - 在浏览器中编辑 session、window、pane、pane 标题、启动命令和标签。
 - 预览生成的 YAML 和 shell 脚本。
 - 将 YAML、shell 脚本或两者导出到服务端目录。
+- 将新版本导出的 tmux-generator shell 脚本重新导入编辑器继续修改。
 - 可选安装启动、关闭、删除三个短命令。
 - 将界面配置缓存到 `.codex/tmux-generator-ui.json`。
 - 从 Web 页面启动 tmux 时打开本地终端，关闭时终止对应 tmux session。
@@ -19,7 +20,7 @@
 
 ## 环境要求
 
-- Python 3.9+
+- Python 3.10+
 - tmux
 - 后台服务启动 tmux 时，本机需要存在以下终端命令之一：`x-terminal-emulator`、`gnome-terminal`、`konsole`、`xfce4-terminal`、`xterm`
 

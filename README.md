@@ -11,6 +11,7 @@ Web tool for creating, previewing, exporting, launching, and stopping tmux sessi
 - Edit session, windows, panes, pane titles, commands, and tags in a browser.
 - Preview generated YAML and shell scripts.
 - Export YAML, shell scripts, or both to a server-side directory.
+- Import newly exported tmux-generator shell scripts back into the editor.
 - Optionally install quick start, stop, and delete commands.
 - Cache UI configuration in `.codex/tmux-generator-ui.json`.
 - Launch tmux in a local terminal and stop the generated tmux session from the web UI.
@@ -19,7 +20,7 @@ Web tool for creating, previewing, exporting, launching, and stopping tmux sessi
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.10+
 - tmux
 - One supported local terminal command when launching from a background service: `x-terminal-emulator`, `gnome-terminal`, `konsole`, `xfce4-terminal`, or `xterm`
 
